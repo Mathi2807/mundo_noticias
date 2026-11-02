@@ -1,16 +1,15 @@
 name: Producir bucle de Mundo Noticias
 on:
   schedule:
-    - cron: '5 * * * *'
+    - cron: '5,35 * * * *'      # dos bucles por hora para ir siempre por delante de la emisión
   workflow_dispatch:
     inputs:
-      minutos: {description: 'Duración del bucle en minutos (vacío = automática)', required: false}
-concurrency: {group: producir, cancel-in-progress: false}
+      minutos: {description: 'Duración del bucle en minutos (vacío = 35)', required: false}
 permissions: {contents: write}
 jobs:
   producir:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,11 +20,13 @@ jobs:
         with: {path: voz, key: voz-davefx-v1}
       - run: bash scripts/instalar_voz.sh
       - name: Producir
-        run: python3 main.py producir --estado estado --salida salida --minutos "${{ github.event.inputs.minutos || 55 }}"
+        run: python3 main.py producir --estado estado --salida salida --limpiar --minutos "${{ github.event.inputs.minutos || 35 }}"
       - uses: actions/upload-artifact@v4
-        with: {name: bucle, path: "salida/bucle.mp4\nsalida/creditos.txt\nsalida/lista.json", retention-days: 3}
+        with: {name: bucle, path: "salida/bucle.mp4\nsalida/creditos.txt\nsalida/lista.json", retention-days: 2}
       - name: Guardar estado
         run: |
           git config user.name "mundo-noticias-bot"; git config user.email "bot@users.noreply.github.com"
           git add estado/estado.json estado/salud_fuentes.json || true
-          git commit -m "Estado del programa" || echo "sin cambios"; git push || true
+          git commit -m "Estado del programa" || echo "sin cambios"
+          git pull --rebase || true
+          git push || true
