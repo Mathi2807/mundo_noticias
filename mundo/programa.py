@@ -10,11 +10,13 @@ from . import voz as vozmod
 from .animacion import Josue, envolvente_boca
 from .redactor import ETIQUETAS, redactar, titular_corto
 from .render import capas, W, H
+from .pase import barrido, swoosh, SEG_PASE
+from .ticker import Ticker
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FPS = 25
 SR = 44100
-PAD_ANTES, PAD_DESPUES = 0.25, 0.45
+PAD_ANTES, PAD_DESPUES = 0.75, 0.45     # la voz entra después del barrido de pase
 
 
 def cargar_parrilla():
@@ -52,23 +54,40 @@ def item_noticia(c):
     guion, motor, problemas = redactar(c)
     if problemas:
         return None
+    if c.get('repaso'):
+        guion = 'Repasamos una noticia de hoy. ' + guion
     fecha = (c.get('fecha') or '')[:10]
     sub = 'Fuente: %s' % c['fuente']
     if fecha:
         y, m, d = fecha.split('-')
         sub += ' · %d %s %s' % (int(d), MESES[int(m) - 1][:3], y)
     return {'id': c['id'], 'seccion': c['seccion_txt'], 'set': 'deportes' if sec == 'deportes' else 'noticias',
-            'titular': titular_corto(c['titulo']), 'sub': sub, 'fuente': c['fuente'], 'url': c['url'], 'guion': guion,
+            'titular': titular_corto(c['titulo'], 120), 'sub': sub, 'fuente': c['fuente'], 'url': c['url'], 'guion': guion,
             'motor': motor, 'tipo': c.get('tipo', 'interes')}
 
 
+def _est(it):
+    """Segundos aproximados que dura una nota hablada (antes de sintetizar la voz)."""
+    return len((it.get('guion') or '').split()) / 2.5 + PAD_ANTES + PAD_DESPUES + 1
+
+
+def _pausa(pista, franja, k):
+    t = ['Escuchas «%s», música creada por Mundo Noticias. Seguimos en %s.',
+         'Eso fue «%s», una pieza original de Mundo Noticias. Esto es %s.',
+         'Música original de Mundo Noticias: «%s». Continuamos en %s.'][k % 3]
+    g = t % (pista['titulo'], franja['nombre'])
+    return {'tipo': 'voz', 'item': {'id': 'pausa%d' % k, 'seccion': 'Mundo Noticias', 'set': 'noticias', 'titular': franja['nombre'],
+                                    'sub': 'Música generada por Mundo Noticias · sin derechos de terceros', 'guion': g}}
+
+
 def armar_bucle(franja, loc, notas, extras, pistas, objetivo_min, parrilla, rng):
-    """Devuelve la lista de segmentos del bucle. notas: ítems ya redactados; extras: clima/tipo de cambio."""
-    inter = parrilla['musica_interludio_minutos'] * 60
+    """Devuelve la lista de segmentos del bucle. notas: ítems ya redactados; extras: clima/tipo de cambio.
+    Las notas se reparten parejo entre las canciones, para que no haya una pared de música ni una de voz."""
     segs = []
+    meta = objetivo_min * 60
     if franja['tipo'] == 'musica':
         t, k = 0.0, 0
-        while t < objetivo_min * 60:
+        while t < meta:
             p = pistas[k % len(pistas)]
             segs.append({'tipo': 'musica', 'pista': p, 'dur': p['dur']}); t += p['dur']; k += 1
         return segs
@@ -78,25 +97,31 @@ def armar_bucle(franja, loc, notas, extras, pistas, objetivo_min, parrilla, rng)
         saludo(loc), '. '.join(t.rstrip('.') for t in titulares) if titulares else 'Hoy te traemos lo más útil y lo mejor del día')
     segs.append({'tipo': 'voz', 'item': {'id': 'titulares', 'seccion': 'Titulares', 'set': 'noticias', 'titular': 'Titulares de hoy',
                                          'sub': 'Mundo Noticias · ' + ahora_txt, 'guion': guion_tit}})
-    cola = list(notas)
     for e in extras.get('inicio', []):
         segs.append({'tipo': 'voz', 'item': e})
-    por_bloque = parrilla['notas_por_bloque']
-    pj = 0
-    total = lambda: sum(s.get('dur', 0) for s in segs)
-    while cola:
-        n = rng.randint(*por_bloque)
-        for _ in range(min(n, len(cola))):
+    cierre = {'tipo': 'voz', 'item': {'id': 'cierre', 'seccion': 'Mundo Noticias', 'set': 'noticias', 'titular': 'Gracias por acompañarnos',
+                                      'sub': 'Presentador y voz generados con IA · Fuentes citadas en cada nota',
+                                      'guion': 'Eso fue todo por ahora. Las noticias de este espacio vienen de fuentes oficiales, que mencionamos en cada nota. '
+                                               'Josué y su voz son generados con inteligencia artificial. Gracias por acompañarnos en Mundo Noticias.'}}
+    fijo = sum(_est(s['item']) for s in segs) + _est(cierre['item']) + sum(_est(e) for e in extras.get('fin', []))
+    habla = sum(_est(n) for n in notas)
+    dur_pista = sum(p['dur'] for p in pistas) / max(1, len(pistas))
+    n_can = max(1, int(round((meta - fijo - habla) / dur_pista))) if pistas else 0
+    # cada canción cierra un bloque; las notas se reparten parejo entre los bloques (máx. 5 por bloque)
+    bloques = max(n_can, int(math.ceil(len(notas) / 5.0))) if notas else n_can
+    reparto = [len(notas) // bloques + (1 if i < len(notas) % bloques else 0) for i in range(bloques)] if bloques else []
+    cola, pj, seguidas = list(notas), 0, 0
+    for i, cuantas in enumerate(reparto):
+        for _ in range(cuantas):
             segs.append({'tipo': 'voz', 'item': cola.pop(0)})
-        if cola and pistas:
+        if pistas and i < n_can:
             p = pistas[pj % len(pistas)]; pj += 1
-            segs.append({'tipo': 'musica', 'pista': p, 'dur': min(p['dur'], inter)})
+            segs.append({'tipo': 'musica', 'pista': p, 'dur': p['dur']})
+            if cuantas == 0 or (i < len(reparto) - 1 and reparto[i + 1] == 0):
+                segs.append(_pausa(p, franja, pj))       # canciones seguidas: Josué las presenta
     for e in extras.get('fin', []):
         segs.append({'tipo': 'voz', 'item': e})
-    segs.append({'tipo': 'voz', 'item': {'id': 'cierre', 'seccion': 'Mundo Noticias', 'set': 'noticias', 'titular': 'Gracias por acompañarnos',
-                                         'sub': 'Presentador y voz generados con IA · Fuentes citadas en cada nota',
-                                         'guion': 'Eso fue todo por ahora. Las noticias de este espacio vienen de fuentes oficiales, que mencionamos en cada nota. '
-                                                  'Josué y su voz son generados con inteligencia artificial. Gracias por acompañarnos en Mundo Noticias.'}})
+    segs.append(cierre)
     return segs
 
 
@@ -146,7 +171,8 @@ def escribir_audio(segs, pistas_fondo, ruta):
     with wave.open(ruta, 'wb') as w:
         w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR)
         previo = 0.5
-        for s in segs:
+        sw = swoosh()
+        for k, s in enumerate(segs):
             n = int(round(s['dur'] * SR))
             if s['tipo'] == 'voz':
                 voz = np.zeros(n, np.float32)
@@ -168,44 +194,52 @@ def escribir_audio(segs, pistas_fondo, ruta):
                 f = min(int(2.5 * SR), n // 2)
                 m[-f:] *= np.linspace(1, 0, f, dtype=np.float32)[:, None]
                 mezcla = m * 0.55
+            if k > 0:
+                m = min(len(sw), len(mezcla)); mezcla[:m] += sw[:m]
             w.writeframes((np.clip(mezcla, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
-def escribir_video(segs, audio, salida, franja_nombre, loc, calidad=23, res='1280x720'):
-    """Anima cada segmento y lo envía a ffmpeg por tubería, junto con el audio mezclado."""
+def escribir_video(segs, audio, salida, franja_nombre, loc, calidad=23, res='1280x720', ticker_items=None):
+    """Anima cada segmento, une los segmentos con el pase de barrido, dibuja la barra de noticias y envía todo a ffmpeg."""
     cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', '%dx%d' % (W, H), '-r', str(FPS), '-i', '-',
            '-i', audio, '-vf', 'scale=%s:flags=lanczos,format=yuv420p' % res.replace('x', ':'), '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11',
            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', str(calidad), '-c:a', 'aac', '-b:a', '160k', '-ar', '44100', '-shortest', salida]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     jos = {'noticias': Josue('traje', semilla=3), 'deportes': Josue('deportes', semilla=4)}
     set_mus = cv2.cvtColor(cv2.imread(os.path.join(RAIZ, 'assets', 'set_musica.png')), cv2.COLOR_BGR2RGB)
+    ticker = Ticker(ticker_items or [])
+    n_pase = int(round(SEG_PASE * FPS))
     t = 0.0
+    ultimo = None
     try:
-        for s in segs:
+        for k, s in enumerate(segs):
             n = int(round(s['dur'] * FPS))
             if s['tipo'] == 'voz':
                 it = s['item']
                 j = jos[it['set']]
                 cs = capas(it, franja_nombre)
-                for i in range(n):
-                    ap = float(s['boca'][i]) if i < len(s['boca']) else 0.0
-                    f = j.fotograma(t + i / FPS, ap, hablando=ap > 0.05)
-                    for c in cs:
-                        c.sobre(f)
-                    p.stdin.write(f.tobytes())
             else:
                 it = {'seccion': 'Música', 'titular': 'Ahora suena: ' + s['pista']['titulo'],
                       'sub': 'Música generada por Mundo Noticias · sin derechos de terceros', 'set': 'musica'}
                 cs = capas(it, franja_nombre)
-                for i in range(n):
-                    tt = t + i / FPS
+            for i in range(n):
+                tt = t + i / FPS
+                if s['tipo'] == 'voz':
+                    ap = float(s['boca'][i]) if i < len(s['boca']) else 0.0
+                    f = j.fotograma(tt, ap, hablando=ap > 0.05)
+                else:
                     z = 1.0 + 0.006 * math.sin(2 * math.pi * tt / 18)
                     M = cv2.getRotationMatrix2D((W / 2, H * 0.55), 0, z)
                     M[0, 2] += 3 * math.sin(2 * math.pi * tt / 23)
                     f = cv2.warpAffine(set_mus, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
-                    for c in cs:
-                        c.sobre(f)
-                    p.stdin.write(f.tobytes())
+                for c in cs:
+                    c.sobre(f)
+                if k > 0 and i < n_pase and ultimo is not None:
+                    f = barrido(ultimo, f, (i + 1) / n_pase)
+                if i == n - 1:
+                    ultimo = f.copy()          # último cuadro sin la barra: la barra se dibuja siempre encima y animada
+                ticker.sobre(f, tt)
+                p.stdin.write(f.tobytes())
             t += n / FPS
     finally:
         p.stdin.close()

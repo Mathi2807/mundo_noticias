@@ -17,6 +17,23 @@ PROG_MAYOR = [[0, 2, 4], [4, 6, 8], [5, 7, 9], [3, 5, 7]]       # I  V  vi  IV (
 PROG_MENOR = [[0, 2, 4], [5, 7, 9], [2, 4, 6], [6, 8, 10]]      # i  VI III VII
 
 
+PROGS_MAYOR = [PROG_MAYOR, [[0, 2, 4], [3, 5, 7], [4, 6, 8], [0, 2, 4]], [[0, 2, 4], [5, 7, 9], [3, 5, 7], [4, 6, 8]], [[3, 5, 7], [0, 2, 4], [4, 6, 8], [5, 7, 9]]]
+PROGS_MENOR = [PROG_MENOR, [[0, 2, 4], [3, 5, 7], [6, 8, 10], [4, 6, 8]], [[0, 2, 4], [6, 8, 10], [5, 7, 9], [6, 8, 10]], [[5, 7, 9], [6, 8, 10], [0, 2, 4], [0, 2, 4]]]
+PRIMERA = {
+    'calma': ['Marea', 'Luz', 'Niebla', 'Brisa', 'Cielo', 'Sueño', 'Luna', 'Silencio', 'Rocío', 'Sombra', 'Eco', 'Arena'],
+    'despierta': ['Primer café', 'Amanecer', 'Rayos', 'Camino', 'Mañana', 'Desayuno', 'Canto', 'Brillo', 'Despertar', 'Aire', 'Paso', 'Rocío'],
+    'marcha': ['Tarde', 'Ruta', 'Calle', 'Movimiento', 'Pasos', 'Ritmo', 'Mediodía', 'Avenida', 'Impulso', 'Camino', 'Viaje', 'Energía'],
+    'positivo': ['Atardecer', 'Hora', 'Luz', 'Cierre', 'Sonrisa', 'Brindis', 'Abrazo', 'Cielo', 'Calidez', 'Regreso', 'Fiesta', 'Gratitud'],
+}
+SEGUNDA = ['de colibríes', 'en el Valle', 'dorado', 'tico', 'sobre las nubes', 'del volcán', 'de cafetal', 'ligero', 'en la costa', 'de montaña',
+           'azul', 'de lluvia suave', 'del Pacífico', 'en Guanacaste', 'del Caribe', 'verde', 'de Monteverde', 'cálido', 'entre palmeras', 'de domingo']
+
+
+def _nombre(franja, semilla):
+    r = np.random.default_rng(semilla + 7919)
+    return '%s %s' % (PRIMERA[franja][int(r.integers(0, len(PRIMERA[franja])))], SEGUNDA[int(r.integers(0, len(SEGUNDA)))])
+
+
 def _f(midi):
     return 440.0 * 2 ** ((midi - 69) / 12)
 
@@ -50,11 +67,16 @@ def _reverb(x, rng, seg=3.2, mezcla=0.38):
 
 
 def generar_pista(franja, semilla, minutos=4.5):
-    h = HUMORES[franja]
+    h = dict(HUMORES[franja])
     rng = np.random.default_rng(semilla)
+    # cada canción se desvía del humor base: otra tonalidad cercana, otro tempo, otra progresión, otro timbre
+    h['bpm'] = h['bpm'] * rng.uniform(0.86, 1.16)
+    h['brillo'] = float(np.clip(h['brillo'] + rng.uniform(-0.15, 0.2), 0.1, 0.8))
+    h['notas'] = float(np.clip(h['notas'] * rng.uniform(0.6, 1.3), 0.15, 1.0))
     escala = MAYOR if h['modo'] == 'mayor' else MENOR
-    prog = PROG_MAYOR if h['modo'] == 'mayor' else PROG_MENOR
-    raiz = 48 + NOTAS[h['tonica']] % 12
+    prog = (PROGS_MAYOR if h['modo'] == 'mayor' else PROGS_MENOR)[int(rng.integers(0, 4))]
+    raiz = 48 + (NOTAS[h['tonica']] + int(rng.choice([-5, -3, -2, 0, 0, 2, 3, 5]))) % 12
+    nombre = _nombre(franja, semilla)
     def grado(g):
         return raiz + escala[g % 7] + 12 * (g // 7)
     total = minutos * 60
@@ -90,7 +112,7 @@ def generar_pista(franja, semilla, minutos=4.5):
         c[:f] *= rampa; c[-f:] *= rampa[::-1]
     est = np.stack([izq, der], 1)
     est /= (np.abs(est).max() + 1e-9)
-    return (est * 0.8).astype(np.float32), h['nombres'][semilla % len(h['nombres'])]
+    return (est * 0.8).astype(np.float32), nombre
 
 
 def guardar_wav(est, ruta):
@@ -106,7 +128,7 @@ def pistas(franja, carpeta, cantidad=3, semilla_base=0, minutos=4.5):
     for k in range(cantidad):
         sem = semilla_base + k
         ruta = os.path.join(carpeta, '%s_%d_%d.wav' % (franja, sem, int(minutos * 10)))
-        titulo = HUMORES[franja]['nombres'][sem % 5]
+        titulo = _nombre(franja, sem)
         if not os.path.exists(ruta):
             est, titulo = generar_pista(franja, sem, minutos)
             guardar_wav(est, ruta)

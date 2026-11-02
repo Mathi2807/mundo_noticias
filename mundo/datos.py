@@ -19,7 +19,7 @@ def _simbolo(code):
 
 def clima(ciudades, descargar_fn=descargar):
     """Devuelve un item de noticiero 'Clima' o None."""
-    frases, ok = [], 0
+    frases, ok, linea = [], 0, []
     ahora = datetime.now(timezone.utc)
     for nombre, lat, lon in ciudades:
         try:
@@ -34,7 +34,7 @@ def clima(ciudades, descargar_fn=descargar):
             tmin, tmax = round(min(temps)), round(max(temps))
             llu = 'sin lluvia importante' if lluvia < 0.5 else ('con lluvia acumulada de %s milímetros' % numero_a_letras(round(lluvia)) if round(lluvia) > 0 else 'con lluvias ligeras')
             frases.append('En %s, entre %s y %s grados, %s y %s.' % (nombre, numero_a_letras(tmin), numero_a_letras(tmax), _simbolo(sim).replace('con ', 'con ') if sim else 'variable', llu))
-            ok += 1
+            linea.append('%s %d°–%d°' % (nombre, tmin, tmax)); ok += 1
         except Exception:
             continue
     if not ok:
@@ -42,7 +42,8 @@ def clima(ciudades, descargar_fn=descargar):
     guion = 'Así estará el tiempo en las próximas doce horas, según los datos de MET Norway. ' + ' '.join(frases)
     return {'id': 'clima', 'seccion': 'Clima', 'set': 'noticias', 'titular': 'El tiempo en las próximas horas',
             'sub': 'Datos: MET Norway (CC BY 4.0) · San José, Liberia, Limón y Puntarenas', 'fuente': 'MET Norway',
-            'url': 'https://api.met.no/', 'guion': guion, 'tipo': 'interes'}
+            'url': 'https://api.met.no/', 'guion': guion, 'tipo': 'interes',
+            'ticker': [('CLIMA', ' · '.join(linea))]}
 
 
 def tipo_cambio(url, descargar_fn=descargar):
@@ -58,4 +59,5 @@ def tipo_cambio(url, descargar_fn=descargar):
     guion = ('Para tu bolsillo: según el Ministerio de Hacienda, el tipo de cambio de referencia del dólar está en %s colones para la compra y %s colones para la venta.') % (letras(c), letras(v))
     return {'id': 'tipo_cambio', 'seccion': 'Tu bolsillo', 'set': 'noticias', 'titular': 'Dólar: compra %.2f · venta %.2f' % (c, v),
             'sub': 'Fuente: Ministerio de Hacienda · tipo de cambio de referencia', 'fuente': 'Ministerio de Hacienda',
-            'url': url, 'guion': guion, 'tipo': 'interes'}
+            'url': url, 'guion': guion, 'tipo': 'interes',
+            'ticker': [('TU BOLSILLO', 'Dólar: compra ₡%.2f · venta ₡%.2f (Hacienda)' % (c, v))]}

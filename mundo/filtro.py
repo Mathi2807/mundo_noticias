@@ -84,7 +84,7 @@ def parecido(a, b):
 
 
 class Seleccion:
-    def __init__(self, estado_path, reuso_horas=20):
+    def __init__(self, estado_path, reuso_horas=30):
         self.path = estado_path
         self.estado = {'usadas': {}}
         if os.path.exists(estado_path):
@@ -109,6 +109,21 @@ class Seleccion:
         ahora = ahora or datetime.now(timezone.utc)
         for i in ids:
             self.estado['usadas'][i] = ahora.isoformat()
+
+    def repaso(self, candidatas, n, destino_utc, excluir=()):
+        """Notas ya usadas HOY (hora de Costa Rica, al momento de emitirse): las menos recientes primero.
+        Nunca devuelve algo de otro día."""
+        cr = lambda d: (d + timedelta(hours=-6)).date()
+        dia = cr(destino_utc)
+        out = []
+        for c in candidatas:
+            u = self.estado['usadas'].get(c['id'])
+            if not u or c['id'] in excluir:
+                continue
+            if cr(datetime.fromisoformat(u)) == dia:
+                out.append((u, c))
+        out.sort(key=lambda x: x[0])
+        return [c for _, c in out[:n]]
 
     def candidatas(self, items, ahora=None):
         """Evalúa, quita duplicados (mismo enlace o título muy parecido) y devuelve (aceptadas, descartadas)."""
