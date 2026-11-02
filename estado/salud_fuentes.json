@@ -2,7 +2,7 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 0.2
+  "seg": 1.2
  },
  "onu_salud": {
   "ok": false,
@@ -23,12 +23,12 @@
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 7.9
+  "seg": 9.5
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 13.1
+  "seg": 13.0
  },
  "unafut": {
   "ok": false,
@@ -37,7 +37,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 9.2
+  "seg": 10.8
  },
  "salud": {
   "ok": false,
@@ -50,12 +50,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 17.8
+  "seg": 19.7
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 5.4
+  "seg": 3.4
  },
  "ccss": {
   "ok": false,
