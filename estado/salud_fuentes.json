@@ -1,0 +1,68 @@
+{
+ "onu_all": {
+  "ok": true,
+  "items": 8,
+  "seg": 0.3
+ },
+ "onu_salud": {
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+ },
+ "onu_ambiente": {
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+ },
+ "onu_cultura_educ": {
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+ },
+ "onu_desarrollo": {
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+ },
+ "bbc_mundo": {
+  "ok": true,
+  "items": 8,
+  "seg": 7.8
+ },
+ "dw_es": {
+  "ok": true,
+  "items": 8,
+  "seg": 19.9
+ },
+ "unafut": {
+  "ok": false,
+  "error": "HTTPError: HTTP Error 404: Not Found"
+ },
+ "mep": {
+  "ok": true,
+  "items": 8,
+  "seg": 10.0
+ },
+ "salud": {
+  "ok": false,
+  "error": "HTTPError: HTTP Error 404: Not Found"
+ },
+ "presidencia": {
+  "ok": false,
+  "error": "HTTPError: HTTP Error 404: Not Found"
+ },
+ "ucr": {
+  "ok": true,
+  "items": 8,
+  "seg": 16.4
+ },
+ "tec": {
+  "ok": true,
+  "items": 1,
+  "seg": 3.2
+ },
+ "ccss": {
+  "ok": false,
+  "error": "URLError: <urlopen error timed out>"
+ },
+ "sinac": {
+  "ok": false,
+  "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>"
+ }
+}
