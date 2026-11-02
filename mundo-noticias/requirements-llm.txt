@@ -1,4 +1,0 @@
-# Opcional: redacción con modelo propio (más lento). Activar con MUNDO_LLM=transformers
-torch
-transformers
-accelerate
