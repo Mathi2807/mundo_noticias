@@ -1,0 +1,13 @@
+{
+  "zona_horaria_utc": -6,
+  "franjas": [
+    {"id": "calma",    "nombre": "Mundo en Calma",    "desde": "00:00", "hasta": "04:30", "tipo": "musica",  "humor": "calma"},
+    {"id": "despierta","nombre": "Mundo Despierta",   "desde": "04:30", "hasta": "12:00", "tipo": "noticias", "humor": "despierta"},
+    {"id": "marcha",   "nombre": "Mundo en Marcha",   "desde": "12:00", "hasta": "18:00", "tipo": "noticias", "humor": "marcha"},
+    {"id": "positivo", "nombre": "Mundo en Positivo", "desde": "18:00", "hasta": "24:00", "tipo": "noticias", "humor": "positivo"}
+  ],
+  "bucle_minutos": [60, 120],
+  "notas_por_bloque": [2, 4],
+  "musica_interludio_minutos": 4.5,
+  "mezcla_noticias": {"interes_publico": 0.55, "positivas": 0.45}
+}
