@@ -1,0 +1,21 @@
+name: Vigilante del directo
+on:
+  schedule:
+    - cron: '*/20 * * * *'
+  workflow_dispatch:
+permissions: {actions: write}
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Si no hay ninguna emisión activa o en espera, lanzar una
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          activos=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow emitir.yml --limit 20 --json status \
+            --jq '[.[] | select(.status=="in_progress" or .status=="queued" or .status=="waiting" or .status=="pending" or .status=="requested")] | length')
+          echo "Emisiones activas o en espera: $activos"
+          if [ "$activos" = "0" ]; then
+            echo "El directo está caído: lanzando una emisión nueva."
+            gh workflow run emitir.yml --repo "$GITHUB_REPOSITORY"
+          fi
