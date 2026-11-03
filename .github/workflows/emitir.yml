@@ -2,8 +2,8 @@ name: Emitir en vivo (YouTube y Twitch)
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 */6 * * *'   # red de seguridad: si el relevo automático falla, esto vuelve a arrancar la emisión
-concurrency: {group: emisor, cancel-in-progress: false}   # solo una emisión a la vez; la siguiente espera su turno
+    - cron: '17 */6 * * *'
+concurrency: {group: emisor, cancel-in-progress: false}
 permissions: {contents: read, actions: write}
 jobs:
   emitir:
@@ -11,7 +11,10 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11', cache: pip}
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install -r requirements.txt
       - name: Emitir
         env:
           GH_TOKEN: ${{ github.token }}
