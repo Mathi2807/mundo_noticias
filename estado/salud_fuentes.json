@@ -2,7 +2,7 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 1.4
+  "seg": 1.0
  },
  "onu_salud": {
   "ok": false,
@@ -23,12 +23,12 @@
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 9.2
+  "seg": 7.6
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 17.9
+  "seg": 17.4
  },
  "unafut": {
   "ok": false,
@@ -37,7 +37,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 19.4
+  "seg": 9.4
  },
  "salud": {
   "ok": false,
@@ -50,12 +50,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 18.5
+  "seg": 18.7
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 4.3
+  "seg": 3.7
  },
  "ccss": {
   "ok": false,
@@ -63,6 +63,6 @@
  },
  "sinac": {
   "ok": false,
-  "error": "URLError: <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1016)>"
+  "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>"
  }
 }
