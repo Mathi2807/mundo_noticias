@@ -48,6 +48,8 @@ class Josue:
         self.rgb = cv2.cvtColor(pr[:, :, :3], cv2.COLOR_BGR2RGB)
         self.alfa = pr[:, :, 3].astype(np.float32) / 255.0
         self.plate = cv2.cvtColor(cv2.imread(plate_path or os.path.join(RAIZ, 'assets', 'plate.png')), cv2.COLOR_BGR2RGB)
+        from .render import limpiar_barra
+        limpiar_barra(self.plate)
         # trabajo solo sobre el recorte donde está Josué (mucho más rápido); las coordenadas se desplazan al recorte
         ys, xs = np.where(self.alfa > 0.02)
         self.oy, self.ox = int(max(0, ys.min() - 24)), int(max(0, xs.min() - 24))

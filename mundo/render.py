@@ -15,6 +15,14 @@ def fuente(peso, tam):
     return _F[k]
 
 
+def limpiar_barra(rgb):
+    """Borra por código cualquier texto de plantilla de la barra inferior del set (y 868-916), copiando una columna limpia.
+    Es idempotente: así funciona aunque la imagen del set sea una versión vieja."""
+    col = rgb[868:916, 1100:1101].copy()
+    rgb[868:916, 62:1345] = col
+    return rgb
+
+
 class Capa:
     """Un recorte RGBA con su posición, listo para mezclar rápido sobre un fotograma."""
     def __init__(self, img, x, y):

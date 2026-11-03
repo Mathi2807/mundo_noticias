@@ -9,7 +9,7 @@ from . import musica as mus
 from . import voz as vozmod
 from .animacion import Josue, envolvente_boca
 from .redactor import ETIQUETAS, redactar, titular_corto
-from .render import capas, W, H
+from .render import capas, limpiar_barra, W, H
 from .pase import barrido, swoosh, SEG_PASE
 from .ticker import Ticker
 
@@ -63,7 +63,7 @@ def item_noticia(c):
         sub += ' · %d %s %s' % (int(d), MESES[int(m) - 1][:3], y)
     return {'id': c['id'], 'seccion': c['seccion_txt'], 'set': 'deportes' if sec == 'deportes' else 'noticias',
             'titular': titular_corto(c['titulo'], 120), 'sub': sub, 'fuente': c['fuente'], 'url': c['url'], 'guion': guion,
-            'motor': motor, 'tipo': c.get('tipo', 'interes')}
+            'motor': motor, 'tipo': c.get('tipo', 'interes'), 'repaso': bool(c.get('repaso'))}
 
 
 def _est(it):
@@ -91,7 +91,8 @@ def armar_bucle(franja, loc, notas, extras, pistas, objetivo_min, parrilla, rng)
             p = pistas[k % len(pistas)]
             segs.append({'tipo': 'musica', 'pista': p, 'dur': p['dur']}); t += p['dur']; k += 1
         return segs
-    titulares = [n['titular'] for n in notas[:5]]
+    reales = [n for n in notas if not n.get('extra')]
+    titulares = [n['titular'] for n in reales[:5]]
     ahora_txt = fecha_larga(loc)
     guion_tit = '%s, soy Josué y esto es Mundo Noticias. Estos son los titulares. %s. Comenzamos.' % (
         saludo(loc), '. '.join(t.rstrip('.') for t in titulares) if titulares else 'Hoy te traemos lo más útil y lo mejor del día')
@@ -102,7 +103,7 @@ def armar_bucle(franja, loc, notas, extras, pistas, objetivo_min, parrilla, rng)
     cierre = {'tipo': 'voz', 'item': {'id': 'cierre', 'seccion': 'Mundo Noticias', 'set': 'noticias', 'titular': 'Gracias por acompañarnos',
                                       'sub': 'Presentador y voz generados con IA · Fuentes citadas en cada nota',
                                       'guion': 'Eso fue todo por ahora. Las noticias de este espacio vienen de fuentes oficiales, que mencionamos en cada nota. '
-                                               'Josué y su voz son generados con inteligencia artificial. Gracias por acompañarnos en Mundo Noticias.'}}
+                                               'Josué y su voz son generados con inteligencia artificial. Nos encuentras en YouTube y Twitch como Mundo Noticias T V, y en Discord, con el enlace en la descripción. Gracias por acompañarnos en Mundo Noticias.'}}
     fijo = sum(_est(s['item']) for s in segs) + _est(cierre['item']) + sum(_est(e) for e in extras.get('fin', []))
     habla = sum(_est(n) for n in notas)
     dur_pista = sum(p['dur'] for p in pistas) / max(1, len(pistas))
@@ -114,6 +115,12 @@ def armar_bucle(franja, loc, notas, extras, pistas, objetivo_min, parrilla, rng)
     for i, cuantas in enumerate(reparto):
         for _ in range(cuantas):
             segs.append({'tipo': 'voz', 'item': cola.pop(0)})
+        if i == len(reparto) // 2 and i > 0:       # resumen a mitad del bucle, para quien entra tarde
+            vistas = [x['item']['titular'] for x in segs if x['tipo'] == 'voz' and x['item'].get('id') not in ('titulares',) and
+                      x['item'].get('seccion') not in ('Clima', 'Tu bolsillo', 'Mundo Noticias', 'Comunidad', '¿Sabías que?', 'Hoy en la historia')][-4:]
+            if len(vistas) >= 3:
+                segs.append({'tipo': 'voz', 'item': {'id': 'resumen', 'seccion': 'Resumen', 'set': 'noticias', 'titular': 'Lo que va del día',
+                             'sub': 'Mundo Noticias · ' + ahora_txt, 'guion': 'Si apenas nos acompañas, este es el resumen. ' + '. '.join(v.rstrip('.') for v in vistas) + '. Seguimos.'}})
         if pistas and i < n_can:
             p = pistas[pj % len(pistas)]; pj += 1
             segs.append({'tipo': 'musica', 'pista': p, 'dur': p['dur']})
@@ -206,7 +213,7 @@ def escribir_video(segs, audio, salida, franja_nombre, loc, calidad=23, res='128
            '-c:v', 'libx264', '-preset', 'veryfast', '-crf', str(calidad), '-c:a', 'aac', '-b:a', '160k', '-ar', '44100', '-shortest', salida]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     jos = {'noticias': Josue('traje', semilla=3), 'deportes': Josue('deportes', semilla=4)}
-    set_mus = cv2.cvtColor(cv2.imread(os.path.join(RAIZ, 'assets', 'set_musica.png')), cv2.COLOR_BGR2RGB)
+    set_mus = limpiar_barra(cv2.cvtColor(cv2.imread(os.path.join(RAIZ, 'assets', 'set_musica.png')), cv2.COLOR_BGR2RGB))
     ticker = Ticker(ticker_items or [])
     n_pase = int(round(SEG_PASE * FPS))
     t = 0.0

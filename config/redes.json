@@ -1,0 +1,6 @@
+{
+  "_nota": "Revisa que los enlaces sean exactos. Para cambiar uno, edita solo la línea 'url' y 'corto'.",
+  "youtube": {"nombre": "YouTube", "url": "https://www.youtube.com/@mundomoticiastv", "corto": "youtube.com/@mundomoticiastv"},
+  "twitch": {"nombre": "Twitch", "url": "https://www.twitch.tv/mundonoticiastv", "corto": "twitch.tv/mundonoticiastv"},
+  "discord": {"nombre": "Discord", "url": "https://discord.gg/g7f8SF6eqb", "corto": "discord.gg/g7f8SF6eqb"}
+}

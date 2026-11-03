@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, RAIZ)
-from mundo import datos, deportes, filtro, ingesta, musica as mus, programa as prog, util
+from mundo import datos, deportes, extras as ext, filtro, ingesta, musica as mus, programa as prog, util
 from mundo.ticker import ETIQUETA_DE
 
 ANTICIPO_MIN = 100   # minutos que pasan, en promedio, entre producir un bucle y que salga al aire
@@ -91,15 +91,35 @@ def producir(a):
         if c: extras['inicio'].append(c)
         tc = datos.tipo_cambio(cfg['datos']['tipo_cambio']['url'], dl)
         if tc: extras['inicio'].append(tc)
+        n_reales = len(notas)
+        # deportes dichos en voz: notas deportivas garantizadas (si las hay) y resumen de marcadores/próximos de ESPN
+        if not any(n['seccion'] == 'Deportes' for n in notas):
+            for c_ in [c_ for c_ in cand if c_['seccion'] == 'deportes' and c_['id'] not in {n['id'] for n in notas}][:2]:
+                it = prog.item_noticia(c_)
+                if it:
+                    notas.insert(min(len(notas), max(2, len(notas) // 2)), it)
+        try:
+            dep_item = deportes.guion_deportivo(cfg['datos']['deportes']['ligas'], destino, dl)
+        except Exception:
+            dep_item = None
+        k_h = int(destino.timestamp() // 3600)
+        mezcla = []
+        e0 = ext.efemeride(loc)
+        if e0: extras['inicio'].append(e0)
+        if dep_item: mezcla.append((0.45, dep_item))
+        mezcla += [(0.30, ext.sabias_que(k_h)), (0.65, ext.promo(k_h)), (0.80, ext.sabias_que(k_h + 7))]
+        for pos, it in sorted(mezcla, key=lambda x: -x[0]):
+            notas.insert(min(len(notas), max(2, int(len(notas) * pos))), it)
         # barra inferior: titulares de todas las candidatas (no solo las leídas) + clima, dólar y fútbol
         usados = {n['id'] for n in notas}
-        for n in notas:
+        for n in [n for n in notas if not n.get('extra') and n['id'] != 'deportes_hoy']:
             ticker_items.append((ETIQUETA_DE.get(n['seccion'], 'ACONTECIMIENTOS'), prog.titular_corto(n['titular'], 95)))
         for c_ in cand:
             if c_['id'] not in usados and len(ticker_items) < 40 and c_['seccion'] != 'deportes':
                 ticker_items.append((ETIQUETA_DE.get(prog.ETIQUETAS.get(c_['seccion'], ''), 'ACONTECIMIENTOS'), prog.titular_corto(c_['titulo'], 95)))
         for e in extras['inicio']:
             ticker_items += e.get('ticker', [])
+        ticker_items += ext.linea_barra()
         try:
             lig = cfg['datos']['deportes']['ligas']
             dep = deportes.obtener(lig, ahora, dl)
@@ -107,10 +127,19 @@ def producir(a):
             print('Deportes en la barra: %d' % len(dep), flush=True)
         except Exception as ex:
             print('Deportes no disponibles:', ex, flush=True)
-        if not notas and not extras['inicio']:
+        if not n_reales and not [e for e in extras['inicio'] if not e.get('extra')]:
             print('Sin noticias válidas: este bucle será de música.'); franja = dict(franja, tipo='musica')
 
-    sel.marcar([n['id'] for n in notas], destino); sel.guardar()
+    try:
+        sal = json.load(open(os.path.join(estado_dir, 'salud_fuentes.json'), encoding='utf-8')) if franja['tipo'] == 'noticias' else {}
+        md = ['# Estado de Mundo Noticias', '', 'Último bucle preparado: %s (UTC)' % ahora.strftime('%Y-%m-%d %H:%M'),
+              'Sale al aire hacia las %s hora de Costa Rica · franja: %s · duración objetivo: %.0f min' % ((destino + timedelta(hours=-6)).strftime('%H:%M'), franja['nombre'], objetivo),
+              'Notas leídas: %d (de repaso: %d)' % (len([n for n in notas if not n.get('extra')]), len([n for n in notas if n.get('repaso')])), '',
+              '## Fuentes', ''] + ['- %s %s' % ('✅' if v.get('ok') else '❌', k) for k, v in sorted(sal.items())]
+        open(os.path.join(estado_dir, 'ESTADO.md'), 'w', encoding='utf-8').write('\n'.join(md) + '\n')
+    except Exception:
+        pass
+    sel.marcar([n['id'] for n in notas if not n.get('extra') and n['id'] != 'deportes_hoy'], destino); sel.guardar()
     if a.tras_seleccion:
         os.system(a.tras_seleccion)     # sube el estado ya, para que la corrida siguiente no repita estas notas
     cant = a.canciones
@@ -126,15 +155,27 @@ def producir(a):
     video = os.path.join(salida, 'bucle.mp4')
     prog.escribir_video(segs, audio, video, franja['nombre'], loc, res=a.resolucion, ticker_items=ticker_items)
     open(os.path.join(salida, 'creditos.txt'), 'w', encoding='utf-8').write(prog.creditos(segs, franja, loc, None))
-    lista = [{'tipo': s['tipo'], 'dur_s': round(s['dur'], 1), 'id': (s.get('item') or {}).get('id') or s['pista']['titulo'],
-              'seccion': (s.get('item') or {}).get('seccion', 'Música'), 'guion': (s.get('item') or {}).get('guion', ''),
-              'fuente': (s.get('item') or {}).get('fuente', ''), 'url': (s.get('item') or {}).get('url', '')} for s in segs]
+    lista, t_ac = [], 0.0
+    for s in segs:
+        it = s.get('item') or {}
+        d_real = int(round(s['dur'] * prog.FPS)) / prog.FPS          # lo que realmente dura en el video
+        lista.append({'tipo': s['tipo'], 'dur_s': round(s['dur'], 1), 'inicio_s': round(t_ac, 3), 'dur_real': round(d_real, 3),
+                      'id': it.get('id') or s['pista']['titulo'], 'seccion': it.get('seccion', 'Música'), 'titular': it.get('titular', ''),
+                      'sub': it.get('sub', ''), 'extra': bool(it.get('extra')), 'repaso': bool(it.get('repaso')), 'set': it.get('set', ''),
+                      'guion': it.get('guion', ''), 'fuente': it.get('fuente', ''), 'url': it.get('url', '')})
+        t_ac += d_real
     json.dump({'franja': franja['nombre'], 'franja_id': franja['id'], 'calma': franja['tipo'] == 'musica', 'generado_utc': ahora.isoformat(),
-               'destino_utc': destino.isoformat(), 'destino_dia_cr': (destino + timedelta(minutes=objetivo / 2, hours=-6)).strftime('%Y-%m-%d'), 'segmentos': lista,
+               'destino_utc': destino.isoformat(), 'fin_utc': (destino + timedelta(seconds=total)).isoformat(), 'destino_dia_cr': (destino + timedelta(minutes=objetivo / 2, hours=-6)).strftime('%Y-%m-%d'), 'segmentos': lista,
                'descartadas': [{'titulo': i['titulo'], 'fuente': i['fuente'], 'motivo': m} for i, m in descartadas[:60]]},
               open(os.path.join(salida, 'lista.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     os.remove(audio) if a.limpiar else None
     print('Listo: %s (%.1f min de video, %.0f s de proceso)' % (video, total / 60, time.time() - t0), flush=True)
+
+
+def clips(a):
+    from mundo import clips as cl
+    n = cl.generar(a.video, a.lista, a.salida, ext.cargar_redes(), maximo=a.maximo)
+    print('Clips generados: %d' % n)
 
 
 def main():
@@ -153,8 +194,11 @@ def main():
     p.add_argument('--offline', action='store_true', help='usa datos de prueba en vez de internet')
     p.add_argument('--resolucion', default='1280x720')
     p.add_argument('--limpiar', action='store_true')
+    c = sub.add_parser('clips')
+    c.add_argument('--video', default='salida/bucle.mp4'); c.add_argument('--lista', default='salida/lista.json')
+    c.add_argument('--salida', default='clips'); c.add_argument('--maximo', type=int, default=5)
     a = ap.parse_args()
-    producir(a)
+    clips(a) if a.cmd == 'clips' else producir(a)
 
 
 if __name__ == '__main__':

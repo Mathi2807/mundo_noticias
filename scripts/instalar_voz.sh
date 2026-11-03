@@ -19,3 +19,11 @@ PY
   cp -r vits-piper-es_ES-davefx-medium/espeak-ng-data espeak-ng-data
 fi
 echo "Voz lista."
+# Tipografía Inter (SIL OFL) para los rótulos
+cd ..
+mkdir -p fuentes_tipograficas
+if [ ! -f fuentes_tipograficas/Inter-ExtraBold.otf ]; then
+  curl -fsSL -o inter.zip https://github.com/rsms/inter/releases/download/v4.0/Inter-4.0.zip
+  unzip -qo inter.zip 'extras/otf/Inter-SemiBold.otf' 'extras/otf/Inter-Bold.otf' 'extras/otf/Inter-ExtraBold.otf' -d inter_tmp
+  mv inter_tmp/extras/otf/*.otf fuentes_tipograficas/ && rm -rf inter.zip inter_tmp
+fi
