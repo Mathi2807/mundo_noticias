@@ -1,15 +1,15 @@
 name: Producir bucle de Mundo Noticias
 on:
   schedule:
-    - cron: '5,35 * * * *'      # dos bucles por hora para ir siempre por delante de la emisión
+    - cron: '5 * * * *'
   workflow_dispatch:
     inputs:
-      minutos: {description: 'Duración del bucle en minutos (vacío = 35)', required: false}
+      minutos: {description: 'Duración del bucle en minutos (vacío = 90 automático)', required: false}
 permissions: {contents: write}
 jobs:
   producir:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,13 +20,17 @@ jobs:
         with: {path: voz, key: voz-davefx-v1}
       - run: bash scripts/instalar_voz.sh
       - name: Producir
-        run: python3 main.py producir --estado estado --salida salida --limpiar --minutos "${{ github.event.inputs.minutos || 35 }}"
-      - uses: actions/upload-artifact@v4
-        with: {name: bucle, path: "salida/bucle.mp4\nsalida/creditos.txt\nsalida/lista.json", retention-days: 2}
-      - name: Guardar estado
         run: |
-          git config user.name "mundo-noticias-bot"; git config user.email "bot@users.noreply.github.com"
-          git add estado/estado.json estado/salud_fuentes.json || true
-          git commit -m "Estado del programa" || echo "sin cambios"
-          git pull --rebase || true
-          git push || true
+          MIN="${{ github.event.inputs.minutos }}"
+          python3 main.py producir --estado estado --salida salida ${MIN:+--minutos "$MIN"} --tras-seleccion "bash scripts/guardar_estado.sh"
+      - uses: actions/upload-artifact@v4
+        with: {name: bucle, path: "salida/bucle.mp4\nsalida/creditos.txt\nsalida/lista.json", retention-days: 1}
+      - name: Clips verticales de 60-90 s
+        continue-on-error: true
+        run: python3 main.py clips --video salida/bucle.mp4 --lista salida/lista.json --salida clips
+      - name: Publicar clips
+        continue-on-error: true
+        env: {GH_TOKEN: "${{ github.token }}"}
+        run: bash scripts/publicar_clips.sh
+      - name: Guardar estado final
+        run: bash scripts/guardar_estado.sh
