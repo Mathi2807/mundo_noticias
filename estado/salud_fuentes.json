@@ -1,8 +1,7 @@
 {
  "onu_all": {
-  "ok": true,
-  "items": 8,
-  "seg": 0.3
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_salud": {
   "ok": false,
@@ -17,18 +16,19 @@
   "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_desarrollo": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+  "ok": true,
+  "items": 8,
+  "seg": 0.1
  },
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 7.2
+  "seg": 7.8
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 13.9
+  "seg": 21.0
  },
  "unafut": {
   "ok": false,
@@ -37,7 +37,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 9.5
+  "seg": 13.7
  },
  "salud": {
   "ok": false,
@@ -50,12 +50,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 18.9
+  "seg": 19.4
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 4.1
+  "seg": 4.0
  },
  "ccss": {
   "ok": false,
@@ -63,6 +63,6 @@
  },
  "sinac": {
   "ok": false,
-  "error": "URLError: <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1016)>"
+  "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)>"
  }
 }
