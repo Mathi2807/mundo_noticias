@@ -1,7 +1,8 @@
 {
  "onu_all": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+  "ok": true,
+  "items": 8,
+  "seg": 0.4
  },
  "onu_salud": {
   "ok": false,
@@ -28,7 +29,7 @@
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 21.0
+  "seg": 22.2
  },
  "unafut": {
   "ok": false,
@@ -37,7 +38,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 13.7
+  "seg": 10.3
  },
  "salud": {
   "ok": false,
@@ -45,17 +46,17 @@
  },
  "presidencia": {
   "ok": false,
-  "error": "HTTPError: HTTP Error 404: Not Found"
+  "error": "HTTPError: HTTP Error 522: <none>"
  },
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 19.4
+  "seg": 17.9
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 4.0
+  "seg": 5.1
  },
  "ccss": {
   "ok": false,
@@ -63,6 +64,6 @@
  },
  "sinac": {
   "ok": false,
-  "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1018)>"
+  "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>"
  }
 }
