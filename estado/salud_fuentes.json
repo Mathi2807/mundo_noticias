@@ -2,34 +2,35 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 0.4
+  "seg": 0.1
  },
  "onu_salud": {
   "ok": false,
   "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_ambiente": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
- },
- "onu_cultura_educ": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
- },
- "onu_desarrollo": {
   "ok": true,
   "items": 8,
-  "seg": 0.1
+  "seg": 0.0
+ },
+ "onu_cultura_educ": {
+  "ok": true,
+  "items": 8,
+  "seg": 0.0
+ },
+ "onu_desarrollo": {
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 7.8
+  "seg": 5.9
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 22.2
+  "seg": 22.6
  },
  "unafut": {
   "ok": false,
@@ -38,7 +39,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 10.3
+  "seg": 11.6
  },
  "salud": {
   "ok": false,
@@ -46,17 +47,17 @@
  },
  "presidencia": {
   "ok": false,
-  "error": "HTTPError: HTTP Error 522: <none>"
+  "error": "HTTPError: HTTP Error 404: Not Found"
  },
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 17.9
+  "seg": 15.5
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 5.1
+  "seg": 4.1
  },
  "ccss": {
   "ok": false,
