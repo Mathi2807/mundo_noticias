@@ -13,22 +13,24 @@
   "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_cultura_educ": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+  "ok": true,
+  "items": 8,
+  "seg": 0.1
  },
  "onu_desarrollo": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+  "ok": true,
+  "items": 8,
+  "seg": 0.1
  },
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 4.1
+  "seg": 6.3
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 12.2
+  "seg": 15.3
  },
  "unafut": {
   "ok": false,
@@ -37,7 +39,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 9.2
+  "seg": 9.4
  },
  "salud": {
   "ok": false,
@@ -50,12 +52,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 17.8
+  "seg": 17.1
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 3.9
+  "seg": 4.5
  },
  "ccss": {
   "ok": false,
