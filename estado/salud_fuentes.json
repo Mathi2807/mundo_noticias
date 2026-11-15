@@ -2,12 +2,12 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 0.1
+  "seg": 0.2
  },
  "onu_salud": {
   "ok": true,
   "items": 8,
-  "seg": 0.0
+  "seg": 0.1
  },
  "onu_ambiente": {
   "ok": false,
@@ -16,22 +16,21 @@
  "onu_cultura_educ": {
   "ok": true,
   "items": 8,
-  "seg": 0.0
+  "seg": 0.1
  },
  "onu_desarrollo": {
-  "ok": true,
-  "items": 8,
-  "seg": 0.0
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 7.5
+  "seg": 7.6
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 13.4
+  "seg": 15.7
  },
  "unafut": {
   "ok": false,
@@ -40,7 +39,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 9.4
+  "seg": 8.9
  },
  "salud": {
   "ok": false,
@@ -53,12 +52,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 16.0
+  "seg": 16.5
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 9.9
+  "seg": 4.3
  },
  "ccss": {
   "ok": false,
