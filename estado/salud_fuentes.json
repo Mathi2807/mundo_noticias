@@ -2,7 +2,7 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 1.4
+  "seg": 0.3
  },
  "onu_salud": {
   "ok": false,
@@ -17,18 +17,19 @@
   "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_desarrollo": {
-  "ok": false,
-  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
+  "ok": true,
+  "items": 8,
+  "seg": 0.1
  },
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 7.8
+  "seg": 7.7
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 22.8
+  "seg": 18.8
  },
  "unafut": {
   "ok": false,
@@ -37,7 +38,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 10.2
+  "seg": 10.9
  },
  "salud": {
   "ok": false,
@@ -50,12 +51,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 19.7
+  "seg": 19.0
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 7.7
+  "seg": 23.4
  },
  "ccss": {
   "ok": false,
