@@ -2,22 +2,20 @@
  "onu_all": {
   "ok": true,
   "items": 8,
-  "seg": 0.2
+  "seg": 0.3
  },
  "onu_salud": {
-  "ok": true,
-  "items": 8,
-  "seg": 0.1
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_ambiente": {
   "ok": true,
   "items": 8,
-  "seg": 0.1
+  "seg": 0.0
  },
  "onu_cultura_educ": {
-  "ok": true,
-  "items": 8,
-  "seg": 0.1
+  "ok": false,
+  "error": "ParseError: not well-formed (invalid token): line 1, column 0"
  },
  "onu_desarrollo": {
   "ok": false,
@@ -26,12 +24,12 @@
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 10.5
+  "seg": 15.7
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 20.6
+  "seg": 16.3
  },
  "unafut": {
   "ok": false,
@@ -40,7 +38,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 9.2
+  "seg": 13.1
  },
  "salud": {
   "ok": false,
@@ -53,16 +51,17 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 17.8
+  "seg": 18.9
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 7.3
+  "seg": 4.8
  },
  "ccss": {
-  "ok": false,
-  "error": "URLError: <urlopen error timed out>"
+  "ok": true,
+  "items": 0,
+  "seg": 2.0
  },
  "sinac": {
   "ok": false,
