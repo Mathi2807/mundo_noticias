@@ -1,8 +1,8 @@
 # Estado de Mundo Noticias
 
-Último bucle preparado: 2026-11-21 17:23 (UTC)
-Sale al aire hacia las 13:03 hora de Costa Rica · franja: Mundo en Marcha · duración objetivo: 90 min
-Notas leídas: 9 (de repaso: 1)
+Último bucle preparado: 2026-11-21 23:06 (UTC)
+Sale al aire hacia las 18:46 hora de Costa Rica · franja: Mundo en Positivo · duración objetivo: 90 min
+Notas leídas: 9 (de repaso: 5)
 
 ## Fuentes
 
@@ -13,7 +13,7 @@ Notas leídas: 9 (de repaso: 1)
 - ✅ onu_all
 - ✅ onu_ambiente
 - ❌ onu_cultura_educ
-- ✅ onu_desarrollo
+- ❌ onu_desarrollo
 - ❌ onu_salud
 - ❌ presidencia
 - ❌ salud
