@@ -11,7 +11,7 @@
  "onu_ambiente": {
   "ok": true,
   "items": 8,
-  "seg": 1.4
+  "seg": 1.2
  },
  "onu_cultura_educ": {
   "ok": false,
@@ -24,12 +24,12 @@
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 8.4
+  "seg": 11.3
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 15.5
+  "seg": 11.5
  },
  "unafut": {
   "ok": false,
@@ -38,7 +38,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 12.5
+  "seg": 12.2
  },
  "salud": {
   "ok": false,
@@ -51,12 +51,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 17.5
+  "seg": 18.9
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 4.2
+  "seg": 5.5
  },
  "ccss": {
   "ok": false,

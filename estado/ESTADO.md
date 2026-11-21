@@ -1,8 +1,8 @@
 # Estado de Mundo Noticias
 
-Último bucle preparado: 2026-11-21 01:25 (UTC)
-Sale al aire hacia las 21:05 hora de Costa Rica · franja: Mundo en Positivo · duración objetivo: 90 min
-Notas leídas: 9 (de repaso: 2)
+Último bucle preparado: 2026-11-21 09:39 (UTC)
+Sale al aire hacia las 05:19 hora de Costa Rica · franja: Mundo Despierta · duración objetivo: 90 min
+Notas leídas: 8 (de repaso: 0)
 
 ## Fuentes
 
