@@ -23,12 +23,12 @@
  "bbc_mundo": {
   "ok": true,
   "items": 8,
-  "seg": 6.3
+  "seg": 6.5
  },
  "dw_es": {
   "ok": true,
   "items": 8,
-  "seg": 13.1
+  "seg": 17.4
  },
  "unafut": {
   "ok": false,
@@ -37,7 +37,7 @@
  "mep": {
   "ok": true,
   "items": 8,
-  "seg": 12.7
+  "seg": 10.1
  },
  "salud": {
   "ok": false,
@@ -50,12 +50,12 @@
  "ucr": {
   "ok": true,
   "items": 8,
-  "seg": 19.3
+  "seg": 15.2
  },
  "tec": {
   "ok": true,
   "items": 1,
-  "seg": 5.0
+  "seg": 11.6
  },
  "ccss": {
   "ok": false,
